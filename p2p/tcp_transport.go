@@ -87,7 +87,7 @@ func (t *TCPTransport) handleConn(conn net.Conn) {
 
 	}
 
-	msg := &Temp{}
+	msg := &Message{}
 
 	for {
 
@@ -96,6 +96,10 @@ func (t *TCPTransport) handleConn(conn net.Conn) {
 			fmt.Printf("TCP error: %v", err)
 			continue
 		}
+
+		msg.From = conn.RemoteAddr()
+
+		fmt.Printf("Message : %+v\n",msg)
 	}
 
 }
