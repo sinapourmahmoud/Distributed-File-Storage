@@ -7,12 +7,18 @@ import (
 	"github.com/sinapourmahmoud/distributed-file-storage/p2p"
 )
 
+func onpeer(p p2p.Peer) error {
+	fmt.Printf("This is onpeer function")
+	return nil
+}
+
 func main() {
 
 	tcpOpts := p2p.TCPTransportOpts{
 		ListenAddress: ":3000",
 		HandshakeFunc: p2p.NopeHandshakeFunc,
 		Decoder:       p2p.DefaultDecoder{},
+		OnPeer:        onpeer,
 	}
 
 	tr := p2p.NewTCPTransport(tcpOpts)
