@@ -21,6 +21,10 @@ func NewTCPPeer(conn net.Conn, outbound bool) *TCPPeer {
 
 }
 
+func (p *TCPPeer) Close() error {
+	return p.conn.Close()
+}
+
 type TCPTransportOpts struct {
 	ListenAddress string
 
@@ -33,13 +37,22 @@ type TCPTransport struct {
 	TCPTransportOpts
 	listener net.Listener
 
+	rpcch chan RPC
+
 	mu    sync.RWMutex
 	peers map[net.Addr]string
+}
+
+func (t *TCPTransport) Consume() <-chan RPC {
+
+	return t.rpcch
+
 }
 
 func NewTCPTransport(opts TCPTransportOpts) *TCPTransport {
 	return &TCPTransport{
 		TCPTransportOpts: opts,
+		rpcch:            make(chan RPC),
 	}
 }
 
@@ -87,19 +100,20 @@ func (t *TCPTransport) handleConn(conn net.Conn) {
 
 	}
 
-	msg := &Message{}
+	rpc := RPC{}
 
 	for {
 
-		if err := t.Decoder.Decode(conn, msg); err != nil {
+		if err := t.Decoder.Decode(conn, &rpc); err != nil {
 
 			fmt.Printf("TCP error: %v", err)
 			continue
 		}
 
-		msg.From = conn.RemoteAddr()
+		rpc.From = conn.RemoteAddr()
+		t.rpcch <- rpc
 
-		fmt.Printf("Message : %+v\n",msg)
+		fmt.Printf("Message : %+v\n", rpc)
 	}
 
 }
