@@ -8,7 +8,7 @@ import (
 )
 
 func onpeer(p p2p.Peer) error {
-	fmt.Printf("This is onpeer function")
+	p.Close()
 	return nil
 }
 

@@ -94,7 +94,7 @@ func (t *TCPTransport) handleConn(conn net.Conn) {
 	var err error
 
 	defer func() {
-		fmt.Printf("TCP connection error: %v", err)
+		fmt.Printf("dropping peer connection : %v", err)
 		conn.Close()
 	}()
 
@@ -116,11 +116,11 @@ func (t *TCPTransport) handleConn(conn net.Conn) {
 	rpc := RPC{}
 
 	for {
+		err := t.Decoder.Decode(conn, &rpc)
 
-		if err := t.Decoder.Decode(conn, &rpc); err != nil {
+		if err != nil {
 
-			fmt.Printf("TCP error: %v", err)
-			continue
+			return
 		}
 
 		rpc.From = conn.RemoteAddr()
